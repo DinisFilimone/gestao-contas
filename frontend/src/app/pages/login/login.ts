@@ -10,56 +10,71 @@ import { fieldError } from '../../core/form.util';
   selector: 'app-login',
   imports: [ReactiveFormsModule],
   template: `
-    <main class="auth-page">
-      <section class="card auth-card">
-        <h1>Gestão de Contas</h1>
-        <p class="muted">Inicie sessão para continuar.</p>
+    <main class="login">
+      <section class="login-hero" aria-hidden="true">
+        <div class="brand">
+          <span class="brand-logo">GC</span>
+          <span>Gestão de Contas</span>
+        </div>
+        <div>
+          <p class="hero-title">As suas contas,<br /><strong>num só lugar.</strong></p>
+          <p class="hero-sub">Consulte saldos, faça transferências e acompanhe o extracto com segurança.</p>
+        </div>
+        <small class="hero-foot">Acesso protegido por autenticação JWT</small>
+      </section>
 
-        @if (expirada()) {
-          <div class="alert alert-warn" role="alert">
-            A sua sessão expirou. Inicie sessão novamente.
-          </div>
-        }
-        @if (error()) {
-          <div class="alert alert-error" role="alert">{{ error() }}</div>
-        }
+      <section class="login-form">
+        <div class="login-box">
+          <p class="eyebrow">Bem-vindo</p>
+          <h1>Aceda à sua conta</h1>
+          <p class="muted">Inicie sessão para continuar.</p>
 
-        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-          <div class="field">
-            <label for="username">Utilizador</label>
-            <input id="username" type="text" formControlName="username" autocomplete="username" />
-            @if (usernameError(); as msg) {
-              <small class="field-error">{{ msg }}</small>
-            }
-          </div>
-
-          <div class="field">
-            <label for="password">Palavra-passe</label>
-            <div class="input-group">
-              <input
-                id="password"
-                [type]="showPassword() ? 'text' : 'password'"
-                formControlName="password"
-                autocomplete="current-password"
-              />
-              <button
-                type="button"
-                class="btn btn-ghost"
-                (click)="showPassword.set(!showPassword())"
-                [attr.aria-pressed]="showPassword()"
-              >
-                {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
-              </button>
+          @if (expirada()) {
+            <div class="alert alert-warn" role="alert">
+              A sua sessão expirou. Inicie sessão novamente.
             </div>
-            @if (passwordError(); as msg) {
-              <small class="field-error">{{ msg }}</small>
-            }
-          </div>
+          }
+          @if (error()) {
+            <div class="alert alert-error" role="alert">{{ error() }}</div>
+          }
 
-          <button type="submit" class="btn btn-primary btn-block" [disabled]="loading()">
-            {{ loading() ? 'A entrar…' : 'Entrar' }}
-          </button>
-        </form>
+          <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <div class="field">
+              <label for="username">Utilizador</label>
+              <input id="username" type="text" formControlName="username" autocomplete="username" />
+              @if (usernameError(); as msg) {
+                <small class="field-error">{{ msg }}</small>
+              }
+            </div>
+
+            <div class="field">
+              <label for="password">Palavra-passe</label>
+              <div class="input-group">
+                <input
+                  id="password"
+                  [type]="showPassword() ? 'text' : 'password'"
+                  formControlName="password"
+                  autocomplete="current-password"
+                />
+                <button
+                  type="button"
+                  class="btn btn-ghost"
+                  (click)="showPassword.set(!showPassword())"
+                  [attr.aria-pressed]="showPassword()"
+                >
+                  {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+                </button>
+              </div>
+              @if (passwordError(); as msg) {
+                <small class="field-error">{{ msg }}</small>
+              }
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" [disabled]="loading()">
+              {{ loading() ? 'A entrar…' : 'Entrar' }}
+            </button>
+          </form>
+        </div>
       </section>
     </main>
   `,
