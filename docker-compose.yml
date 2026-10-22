@@ -1,0 +1,14 @@
+﻿services:
+  db:
+    image: postgres:16-alpine
+    container_name: gestao-contas-db
+    environment:
+      POSTGRES_DB: gestao_contas
+      POSTGRES_USER: contas
+      POSTGRES_PASSWORD: contas123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:

@@ -1,0 +1,19 @@
+﻿# Java / Gradle
+.gradle/
+build/
+out/
+*.class
+
+# Node / React
+node_modules/
+dist/
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# Segredos e sistema
+.env
+*.log
+.DS_Store
