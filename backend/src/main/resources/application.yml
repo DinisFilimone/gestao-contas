@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: gestao-contas
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/gestao_contas}
+    username: ${DB_USER:contas}
+    password: ${DB_PASSWORD:contas123}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+server:
+  port: 8080
