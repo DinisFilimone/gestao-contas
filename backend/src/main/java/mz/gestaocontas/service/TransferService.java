@@ -54,14 +54,11 @@ public class TransferService {
         Account source = accounts.get(from);
         Account target = accounts.get(to);
 
-        // 2) Autorizacao: CLIENTE so move dinheiro da sua propria conta (ADMIN pode de
-        // qualquer uma).
-        if (!isAdmin(authentication)
-                && (source == null || !source.getOwner().getUsername().equals(authentication.getName()))) {
+        // 2) Autorizacao: so o dono da conta de origem transfere. O ADMIN nao move
+        // dinheiro (so cria contas e consulta). Conta de origem inexistente tambem
+        // da 403, para nao revelar que numeros de conta existem.
+        if (source == null || !source.getOwner().getUsername().equals(authentication.getName())) {
             throw new AccessDeniedException("Sem acesso a conta de origem");
-        }
-        if (source == null) {
-            throw new ResourceNotFoundException("Conta de origem nao encontrada");
         }
         if (target == null) {
             throw new ResourceNotFoundException("Conta de destino nao encontrada");
@@ -106,9 +103,5 @@ public class TransferService {
         m.setCounterpartAccountNumber(counterpart);
         m.setTransferReference(reference);
         return m;
-    }
-
-    private boolean isAdmin(Authentication authentication) {
-        return authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
 }

@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, formatDate } from '@angular/common';
 import { Component, effect, inject, input, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
@@ -29,6 +29,9 @@ import {
         @if (auth.isAdmin()) {
           <a class="btn" routerLink="/contas">Voltar às contas</a>
         }
+        <button type="button" class="btn" (click)="exportCsv()" [disabled]="!data()">
+          Exportar CSV
+        </button>
         <button type="button" class="btn" (click)="print()" [disabled]="!data()">Imprimir</button>
       </div>
     </div>
@@ -61,7 +64,10 @@ import {
     }
 
     @if (loading()) {
-      <p class="muted">A carregar movimentos…</p>
+      <div class="skeleton" aria-hidden="true"></div>
+      <div class="skeleton" aria-hidden="true"></div>
+      <div class="skeleton" aria-hidden="true"></div>
+      <span class="sr-only">A carregar movimentos…</span>
     } @else if (data(); as d) {
       <section class="card">
         @if (d.content.length === 0) {
@@ -83,7 +89,14 @@ import {
                 @for (m of d.content; track $index) {
                   <tr>
                     <td class="nowrap">{{ m.dateTime | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
-                    <td>{{ movementLabel[m.type] }}</td>
+                    <td>
+                      <span
+                        class="badge"
+                        [class.badge-in]="m.type === 'TRANSFERENCIA_RECEBIDA'"
+                        [class.badge-out]="m.type === 'TRANSFERENCIA_ENVIADA'"
+                        >{{ movementLabel[m.type] }}</span
+                      >
+                    </td>
                     <td>{{ m.description }}</td>
                     <td class="mono">{{ m.counterpartAccountNumber || '—' }}</td>
                     <td class="num" [class.amount-out]="isDebit(m)" [class.amount-in]="!isDebit(m)">
@@ -177,6 +190,49 @@ export class Statement {
 
   protected print(): void {
     window.print();
+  }
+
+  /** Descarrega os movimentos da página actual em CSV (separador ';', abre bem no Excel PT). */
+  protected exportCsv(): void {
+    const d = this.data();
+    const acc = this.account();
+    if (!d || !acc) {
+      return;
+    }
+    const header = [
+      'Data e hora',
+      'Operação',
+      'Descrição',
+      'Contraparte',
+      'Valor (MZN)',
+      'Saldo resultante (MZN)',
+    ];
+    const rows = d.content.map((m) => [
+      formatDate(m.dateTime, 'dd/MM/yyyy HH:mm:ss', 'pt-PT'),
+      MOVEMENT_LABEL[m.type],
+      this.safeCell(m.description),
+      m.counterpartAccountNumber ?? '',
+      `${this.isDebit(m) ? '-' : ''}${m.amount.toFixed(2).replace('.', ',')}`,
+      m.balanceAfter.toFixed(2).replace('.', ','),
+    ]);
+    const csv = [header, ...rows]
+      .map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(';'))
+      .join('\r\n');
+
+    // "\ufeff" (BOM) faz o Excel reconhecer os acentos (UTF-8).
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `extracto-${acc.accountNumber}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  /** Evita "injecção de fórmulas": o Excel executa células que comecem por = + - @. */
+  private safeCell(value: string | null): string {
+    const text = value ?? '';
+    return /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
   }
 
   private init(numero: string | undefined): void {

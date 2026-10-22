@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
@@ -11,7 +11,6 @@ import {
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
-import { AuthService } from '../../core/auth.service';
 import { errorMessage } from '../../core/error.util';
 import { fieldError, maxTwoDecimals } from '../../core/form.util';
 import { Account, TransferResponse } from '../../core/models';
@@ -26,7 +25,7 @@ type Step = 'form' | 'review' | 'done';
 
 /**
  * Transferência em 3 passos: preencher, rever e confirmar, comprovativo.
- * CLIENTE: a origem é sempre a sua conta. ADMIN: escolhe a conta de origem.
+ * Só o CLIENTE transfere, e sempre da sua própria conta (a origem vem de /accounts/me).
  */
 @Component({
   selector: 'app-transfer',
@@ -35,37 +34,34 @@ type Step = 'form' | 'review' | 'done';
     <div class="page-header">
       <div>
         <h1>Transferência</h1>
-        <p class="muted">Transfira dinheiro entre contas de forma segura.</p>
+        <p class="muted">Transfira dinheiro da sua conta para outra conta de forma segura.</p>
       </div>
     </div>
 
     @if (loading()) {
-      <p class="muted">A carregar…</p>
+      <div class="skeleton skeleton-card" aria-hidden="true"></div>
+      <span class="sr-only">A carregar…</span>
     } @else {
       @if (error()) {
         <div class="alert alert-error" role="alert">{{ error() }}</div>
       }
+
+      <ol class="steps no-print" aria-label="Passos da transferência">
+        <li [class.current]="step() === 'form'" [class.done]="step() !== 'form'">
+          <span>1</span> Dados
+        </li>
+        <li [class.current]="step() === 'review'" [class.done]="step() === 'done'">
+          <span>2</span> Confirmar
+        </li>
+        <li [class.current]="step() === 'done'"><span>3</span> Comprovativo</li>
+      </ol>
 
       @switch (step()) {
         @case ('form') {
           <form class="card" [formGroup]="form" (ngSubmit)="goToReview()" novalidate>
             <div class="field">
               <label for="fromAccount">Conta de origem</label>
-              @if (auth.isAdmin()) {
-                <select id="fromAccount" formControlName="fromAccount">
-                  <option value="" disabled>Seleccione a conta de origem</option>
-                  @for (a of accounts(); track a.id) {
-                    <option [value]="a.accountNumber">
-                      {{ a.accountNumber }} · {{ a.customerName }}
-                    </option>
-                  }
-                </select>
-                @if (err('fromAccount'); as m) {
-                  <small class="field-error">{{ m }}</small>
-                }
-              } @else {
-                <input id="fromAccount" type="text" formControlName="fromAccount" />
-              }
+              <input id="fromAccount" type="text" formControlName="fromAccount" />
               @if (source(); as s) {
                 <small class="muted">
                   Saldo disponível: {{ s.balance | number: '1.2-2' }} MZN
@@ -139,6 +135,9 @@ type Step = 'form' | 'review' | 'done';
                 <dd>{{ values().description || '—' }}</dd>
               </div>
             </dl>
+            <p class="muted review-note">
+              Confirme o número da conta de destino: a transferência é imediata.
+            </p>
             <div class="form-actions">
               <button type="button" class="btn" (click)="back()" [disabled]="submitting()">
                 Voltar
@@ -157,8 +156,12 @@ type Step = 'form' | 'review' | 'done';
 
         @case ('done') {
           @if (result(); as r) {
-            <section class="card">
-              <div class="alert alert-success" role="status">Transferência efectuada com sucesso.</div>
+            <section class="card receipt">
+              <div class="receipt-head" role="status">
+                <span class="receipt-icon" aria-hidden="true">✓</span>
+                <h2>Transferência efectuada</h2>
+                <p class="receipt-amount">{{ r.amount | number: '1.2-2' }} <small>MZN</small></p>
+              </div>
               <dl class="details">
                 <div>
                   <dt>Referência</dt>
@@ -177,10 +180,6 @@ type Step = 'form' | 'review' | 'done';
                   <dd class="mono">{{ r.toAccount }}</dd>
                 </div>
                 <div>
-                  <dt>Valor</dt>
-                  <dd class="strong">{{ r.amount | number: '1.2-2' }} MZN</dd>
-                </div>
-                <div>
                   <dt>Descrição</dt>
                   <dd>{{ r.description }}</dd>
                 </div>
@@ -189,15 +188,10 @@ type Step = 'form' | 'review' | 'done';
                   <dd>{{ r.sourceBalanceAfter | number: '1.2-2' }} MZN</dd>
                 </div>
               </dl>
-              <div class="form-actions">
+              <div class="form-actions no-print">
                 <button type="button" class="btn" (click)="reset()">Nova transferência</button>
-                @if (auth.isAdmin()) {
-                  <a class="btn btn-primary" [routerLink]="['/contas', r.fromAccount, 'extracto']"
-                    >Ver extracto</a
-                  >
-                } @else {
-                  <a class="btn btn-primary" routerLink="/extracto">Ver extracto</a>
-                }
+                <button type="button" class="btn" (click)="print()">Imprimir comprovativo</button>
+                <a class="btn btn-primary" routerLink="/extracto">Ver extracto</a>
               </div>
             </section>
           }
@@ -208,10 +202,6 @@ type Step = 'form' | 'review' | 'done';
 })
 export class Transfer implements OnInit {
   private readonly api = inject(ApiService);
-  protected readonly auth = inject(AuthService);
-
-  /** Query param ?origem=NNN: pré-selecciona a conta de origem (ADMIN). */
-  readonly origem = input<string>();
 
   protected readonly form = new FormGroup(
     {
@@ -236,7 +226,8 @@ export class Transfer implements OnInit {
     { validators: differentAccounts },
   );
 
-  protected readonly accounts = signal<Account[]>([]);
+  /** A conta do cliente autenticado (origem da transferência). */
+  protected readonly source = signal<Account | null>(null);
   protected readonly step = signal<Step>('form');
   protected readonly loading = signal(true);
   protected readonly submitting = signal(false);
@@ -244,16 +235,9 @@ export class Transfer implements OnInit {
   protected readonly result = signal<TransferResponse | null>(null);
   protected readonly values = signal({ fromAccount: '', toAccount: '', amount: 0, description: '' });
 
-  private readonly fromValue = toSignal(this.form.controls.fromAccount.valueChanges, {
-    initialValue: '',
-  });
   private readonly amountValue = toSignal(this.form.controls.amount.valueChanges, {
     initialValue: null,
   });
-
-  protected readonly source = computed(
-    () => this.accounts().find((a) => a.accountNumber === this.fromValue()) ?? null,
-  );
 
   /** Aviso antecipado; a API volta a validar o saldo de qualquer forma. */
   protected readonly insufficient = computed(() => {
@@ -263,10 +247,6 @@ export class Transfer implements OnInit {
   });
 
   private readonly messages: Record<string, Record<string, string>> = {
-    fromAccount: {
-      required: 'Seleccione a conta de origem.',
-      pattern: 'A conta deve ter entre 6 e 20 dígitos.',
-    },
     toAccount: {
       required: 'Indique a conta de destino.',
       pattern: 'A conta deve ter entre 6 e 20 dígitos.',
@@ -280,29 +260,18 @@ export class Transfer implements OnInit {
   };
 
   ngOnInit(): void {
-    if (this.auth.isAdmin()) {
-      this.api.listAccounts().subscribe({
-        next: (list) => {
-          this.accounts.set(list);
-          const origem = this.origem();
-          if (origem && list.some((a) => a.accountNumber === origem)) {
-            this.form.controls.fromAccount.setValue(origem);
-          }
-          this.loading.set(false);
-        },
-        error: (err: unknown) => this.fail(err),
-      });
-    } else {
-      this.api.getMyAccount().subscribe({
-        next: (mine) => {
-          this.accounts.set([mine]);
-          this.form.controls.fromAccount.setValue(mine.accountNumber);
-          this.form.controls.fromAccount.disable();
-          this.loading.set(false);
-        },
-        error: (err: unknown) => this.fail(err),
-      });
-    }
+    this.api.getMyAccount().subscribe({
+      next: (mine) => {
+        this.source.set(mine);
+        this.form.controls.fromAccount.setValue(mine.accountNumber);
+        this.form.controls.fromAccount.disable();
+        this.loading.set(false);
+      },
+      error: (err: unknown) => {
+        this.error.set(errorMessage(err));
+        this.loading.set(false);
+      },
+    });
   }
 
   protected err(name: string): string | null {
@@ -345,11 +314,7 @@ export class Transfer implements OnInit {
       .subscribe({
         next: (res) => {
           this.result.set(res);
-          this.accounts.update((list) =>
-            list.map((a) =>
-              a.accountNumber === res.fromAccount ? { ...a, balance: res.sourceBalanceAfter } : a,
-            ),
-          );
+          this.source.update((s) => (s ? { ...s, balance: res.sourceBalanceAfter } : s));
           this.submitting.set(false);
           this.step.set('done');
         },
@@ -368,8 +333,7 @@ export class Transfer implements OnInit {
     this.step.set('form');
   }
 
-  private fail(err: unknown): void {
-    this.error.set(errorMessage(err));
-    this.loading.set(false);
+  protected print(): void {
+    window.print();
   }
 }

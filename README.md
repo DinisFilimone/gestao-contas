@@ -16,6 +16,7 @@ Módulo de gestão de contas bancárias, desenvolvido como avaliação técnica 
 | Testes automáticos (JUnit) | ✅ |
 | Docker Compose | ✅ |
 | Interface web (Angular) | ✅ |
+| Extras da interface: modo claro/escuro, cartão com saldo e últimos movimentos, transferência em 3 passos com comprovativo imprimível, extracto exportável em CSV | ✅ |
 
 ## Tecnologias
 
@@ -93,7 +94,7 @@ A documentação interactiva está no Swagger UI. Para testar endpoints protegid
 | `GET /api/accounts/{numero}` | Admin (qualquer) · Cliente (só a sua) | Dados da conta |
 | `GET /api/accounts/{numero}/balance` | Admin (qualquer) · Cliente (só a sua) | Saldo |
 | `GET /api/accounts/{numero}/statement?page=&size=` | Admin (qualquer) · Cliente (só a sua) | Extracto paginado |
-| `POST /api/transfers` | Cliente (da sua conta) · Administrador | Transferência atómica |
+| `POST /api/transfers` | Só Cliente (da sua própria conta) | Transferência atómica |
 
 Exemplo de login:
 
@@ -132,6 +133,7 @@ Cada transferência gera **dois movimentos** (enviada e recebida) ligados pela m
 
 - Autenticação **JWT** sem sessão no servidor (stateless), com expiração de 60 minutos.
 - Palavras-passe guardadas apenas como **hash BCrypt**; nunca em texto.
+- O **Administrador** cria contas e consulta, mas não movimenta dinheiro: `POST /api/transfers` devolve 403 para o ADMIN, e o Cliente só transfere da sua própria conta.
 - Autorização por perfil, em duas camadas: regras por URL no `SecurityConfig` e `@PreAuthorize` nos métodos.
 - Um cliente que peça uma conta alheia ou inexistente recebe sempre **403**, para não revelar que números de conta existem.
 - Erros devolvidos num formato JSON uniforme, sem expor detalhes internos.
@@ -157,6 +159,8 @@ CREATE DATABASE gestao_contas_test;
 | Falha a meio | Rollback de saldos e do primeiro movimento |
 | 20 transferências simultâneas | Com 1000 de saldo e pedidos de 100, passam exactamente 10; saldo final 0, nunca negativo |
 | Transferências cruzadas (A→B e B→A) | Terminam todas, sem deadlock |
+| Cliente tenta transferir de conta alheia | Rejeitada (403), saldos intactos |
+| Administrador tenta transferir | Rejeitada (403), saldos intactos |
 
 O relatório em HTML fica em `backend/build/reports/tests/test/index.html`.
 

@@ -46,9 +46,9 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/statement/statement').then((m) => m.Statement),
       },
 
-      // --- Ambos ---
       {
         path: 'transferir',
+        canActivate: [roleGuard('CLIENTE')],
         loadComponent: () => import('./pages/transfer/transfer').then((m) => m.Transfer),
       },
     ],

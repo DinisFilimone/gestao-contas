@@ -2,6 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { ROLE_LABEL } from '../core/models';
+import { ThemeService } from '../core/theme.service';
 
 /** Estrutura comum às páginas autenticadas: barra lateral + conteúdo. */
 @Component({
@@ -43,6 +44,15 @@ import { ROLE_LABEL } from '../core/models';
               </svg>
               A minha conta
             </a>
+            <a routerLink="/transferir" routerLinkActive="active">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 3 4 7l4 4" />
+                <path d="M4 7h16" />
+                <path d="m16 21 4-4-4-4" />
+                <path d="M20 17H4" />
+              </svg>
+              Transferir
+            </a>
             <a routerLink="/extracto" routerLinkActive="active">
               <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
@@ -53,15 +63,6 @@ import { ROLE_LABEL } from '../core/models';
               Extracto
             </a>
           }
-          <a routerLink="/transferir" routerLinkActive="active">
-            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M8 3 4 7l4 4" />
-              <path d="M4 7h16" />
-              <path d="m16 21 4-4-4-4" />
-              <path d="M20 17H4" />
-            </svg>
-            Transferir
-          </a>
         </nav>
 
         <div class="sidebar-foot">
@@ -72,6 +73,29 @@ import { ROLE_LABEL } from '../core/models';
               <small>{{ roleLabel() }}</small>
             </div>
           </div>
+          <button
+            type="button"
+            class="logout theme-toggle"
+            (click)="themeSvc.toggle()"
+            [attr.aria-label]="
+              themeSvc.theme() === 'dark' ? 'Mudar para o modo claro' : 'Mudar para o modo escuro'
+            "
+          >
+            @if (themeSvc.theme() === 'dark') {
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="4" />
+                <path
+                  d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
+                />
+              </svg>
+              Modo claro
+            } @else {
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+              Modo escuro
+            }
+          </button>
           <button type="button" class="logout" (click)="auth.logout()">
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -91,6 +115,7 @@ import { ROLE_LABEL } from '../core/models';
 })
 export class Shell {
   protected readonly auth = inject(AuthService);
+  protected readonly themeSvc = inject(ThemeService);
 
   protected readonly initials = computed(() => this.auth.username().slice(0, 2).toUpperCase());
 

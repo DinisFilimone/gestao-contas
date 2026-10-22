@@ -3,7 +3,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { errorMessage } from '../../core/error.util';
-import { ACCOUNT_TYPE_LABEL, Account } from '../../core/models';
+import { ACCOUNT_TYPE_LABEL, Account, AccountType } from '../../core/models';
 
 /** Administrador: lista todas as contas, com pesquisa e acesso ao extracto. */
 @Component({
@@ -26,7 +26,10 @@ import { ACCOUNT_TYPE_LABEL, Account } from '../../core/models';
     }
 
     @if (loading()) {
-      <p class="muted">A carregar contas…</p>
+      <div class="skeleton" aria-hidden="true"></div>
+      <div class="skeleton" aria-hidden="true"></div>
+      <div class="skeleton" aria-hidden="true"></div>
+      <span class="sr-only">A carregar contas…</span>
     } @else if (!error()) {
       <div class="stats">
         <div class="card stat">
@@ -37,18 +40,40 @@ import { ACCOUNT_TYPE_LABEL, Account } from '../../core/models';
           <span class="muted">Saldo total</span>
           <strong>{{ totalBalance() | number: '1.2-2' }} MZN</strong>
         </div>
+        <div class="card stat">
+          <span class="muted">Contas à ordem</span>
+          <strong>{{ ordemCount() }}</strong>
+        </div>
+        <div class="card stat">
+          <span class="muted">Contas poupança</span>
+          <strong>{{ poupancaCount() }}</strong>
+        </div>
       </div>
 
       <div class="card">
-        <div class="field search">
-          <label for="filtro">Pesquisar</label>
-          <input
-            id="filtro"
-            type="search"
-            placeholder="Nome, número de conta ou NUIT"
-            [value]="filter()"
-            (input)="filter.set($any($event.target).value)"
-          />
+        <div class="toolbar">
+          <div class="field search">
+            <label for="filtro">Pesquisar</label>
+            <input
+              id="filtro"
+              type="search"
+              placeholder="Nome, número de conta ou NUIT"
+              [value]="filter()"
+              (input)="filter.set($any($event.target).value)"
+            />
+          </div>
+          <div class="field">
+            <label for="tipo">Tipo de conta</label>
+            <select
+              id="tipo"
+              [value]="typeFilter()"
+              (change)="typeFilter.set($any($event.target).value)"
+            >
+              <option value="">Todos</option>
+              <option value="ORDEM">Ordem</option>
+              <option value="POUPANCA">Poupança</option>
+            </select>
+          </div>
         </div>
 
         @if (filtered().length === 0) {
@@ -80,9 +105,6 @@ import { ACCOUNT_TYPE_LABEL, Account } from '../../core/models';
                     <td>{{ a.createdAt | date: 'dd/MM/yyyy' }}</td>
                     <td class="actions">
                       <a [routerLink]="['/contas', a.accountNumber, 'extracto']">Extracto</a>
-                      <a routerLink="/transferir" [queryParams]="{ origem: a.accountNumber }"
-                        >Transferir</a
-                      >
                     </td>
                   </tr>
                 }
@@ -102,19 +124,27 @@ export class AccountsList implements OnInit {
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly filter = signal('');
+  protected readonly typeFilter = signal<'' | AccountType>('');
 
   protected readonly filtered = computed(() => {
     const q = this.filter().trim().toLowerCase();
-    if (!q) {
-      return this.accounts();
-    }
+    const type = this.typeFilter();
     return this.accounts().filter(
       (a) =>
-        a.accountNumber.includes(q) ||
-        a.nuit.includes(q) ||
-        a.customerName.toLowerCase().includes(q),
+        (!type || a.accountType === type) &&
+        (!q ||
+          a.accountNumber.includes(q) ||
+          a.nuit.includes(q) ||
+          a.customerName.toLowerCase().includes(q)),
     );
   });
+
+  protected readonly ordemCount = computed(
+    () => this.accounts().filter((a) => a.accountType === 'ORDEM').length,
+  );
+  protected readonly poupancaCount = computed(
+    () => this.accounts().filter((a) => a.accountType === 'POUPANCA').length,
+  );
 
   protected readonly totalBalance = computed(() =>
     this.accounts().reduce((sum, a) => sum + a.balance, 0),

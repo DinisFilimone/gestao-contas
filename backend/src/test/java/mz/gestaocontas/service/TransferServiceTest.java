@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -138,6 +139,34 @@ class TransferServiceTest {
         assertThat(resultados).containsOnly(true);
         assertThat(balance(a)).isEqualByComparingTo("1000.00");
         assertThat(balance(b)).isEqualByComparingTo("1000.00");
+    }
+
+    // ---------- 6) so o dono da conta de origem pode transferir ----------
+    @Test
+    void clienteNaoPodeTransferirDeContaAlheia() {
+        String a = createAccount("1000.00");
+        String b = createAccount("500.00");
+
+        assertThatThrownBy(() -> transferService.transfer(request(a, b, "100.00"), asOwnerOf(b)))
+                .isInstanceOf(AccessDeniedException.class);
+
+        assertThat(balance(a)).isEqualByComparingTo("1000.00");
+        assertThat(balance(b)).isEqualByComparingTo("500.00");
+    }
+
+    // ---------- 7) o administrador nao transfere (so cria contas e consulta) ----------
+    @Test
+    void administradorNaoPodeTransferir() {
+        String a = createAccount("1000.00");
+        String b = createAccount("500.00");
+        Authentication admin = new UsernamePasswordAuthenticationToken("admin", null,
+                List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+
+        assertThatThrownBy(() -> transferService.transfer(request(a, b, "100.00"), admin))
+                .isInstanceOf(AccessDeniedException.class);
+
+        assertThat(balance(a)).isEqualByComparingTo("1000.00");
+        assertThat(movementCount(a)).isEqualTo(1);
     }
 
     // ======================= auxiliares =======================
