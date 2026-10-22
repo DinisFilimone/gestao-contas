@@ -49,7 +49,15 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.CONFLICT, ex.getMessage());
     }
 
-    /** Rede de seguranca: a base de dados rejeitou um valor duplicado/invalido (ex.: corrida entre pedidos). */
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<ApiError> handleBusinessRule(BusinessRuleException ex) {
+        return build(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    /**
+     * Rede de seguranca: a base de dados rejeitou um valor duplicado/invalido (ex.:
+     * corrida entre pedidos).
+     */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleIntegrity(DataIntegrityViolationException ex) {
         return build(HttpStatus.CONFLICT, "Violacao de integridade dos dados (valor duplicado ou invalido)");
