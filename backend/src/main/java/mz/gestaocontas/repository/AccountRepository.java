@@ -18,6 +18,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Optional<Account> findByOwnerId(Long ownerId);
 
+    Optional<Account> findByOwnerUsername(String username);
+
     /**
      * Bloqueia as contas (SELECT ... FOR UPDATE) sempre pela mesma ordem (id),
      * para evitar deadlocks quando duas transferencias cruzam as mesmas contas.
