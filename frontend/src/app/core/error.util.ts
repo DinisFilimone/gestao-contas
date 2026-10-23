@@ -7,7 +7,7 @@ export function errorMessage(err: unknown): string {
     return 'Ocorreu um erro inesperado.';
   }
   if (err.status === 0) {
-    return 'Não foi possível contactar o servidor. Verifique se a API está a correr em http://localhost:8080.';
+    return 'Não foi possível contactar o servidor. Verifique se a API está a correr em http://localhost:8081.';
   }
   const apiMessage = (err.error as Partial<ApiError> | null)?.message;
   if (apiMessage) {

@@ -1,16 +1,16 @@
 # Gestão de Contas: Frontend (Angular 21 + TypeScript)
 
-Interface Web do módulo de Gestão de Contas Bancárias. Consome a API REST Spring Boot (`http://localhost:8080/api`).
+Interface Web do módulo de Gestão de Contas Bancárias. Consome a API REST Spring Boot (`http://localhost:8081/api`).
 
 ## Requisitos
 - Node.js 22.12 ou superior e npm
-- Backend a correr (`docker compose up -d` para o PostgreSQL + API em `localhost:8080`)
+- Backend a correr em `localhost:8081` (ver o README da raiz: `docker compose up --build`, ou `docker compose up -d db` + `./gradlew bootRun`)
 
 ## Executar
 ```bash
 cd frontend
 npm install
-ng serve        # http://localhost:4200
+npm start        # http://localhost:4201
 ```
 
 ## Outros comandos
@@ -22,7 +22,7 @@ ng test --watch=false # testes unitários (Vitest)
 ## Perfis e ecrãs
 | Perfil | Ecrãs |
 |---|---|
-| ADMIN | Lista de contas (pesquisa), criar conta, extracto de qualquer conta, transferir de qualquer conta |
+| ADMIN | Lista de contas (pesquisa), criar conta, extracto de qualquer conta (o ADMIN não movimenta dinheiro) |
 | CLIENTE | A minha conta e saldo, o meu extracto, transferir a partir da sua conta |
 
 ## Decisões técnicas

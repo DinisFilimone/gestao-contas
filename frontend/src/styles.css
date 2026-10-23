@@ -387,6 +387,7 @@ table.data .actions { white-space: nowrap; display: flex; gap: 0.9rem; }
 /* ---------- Botao de tema ---------- */
 .logout.theme-toggle { color: var(--muted); }
 .logout.theme-toggle:hover { background: var(--primary-soft); color: var(--text); }
+.logout.theme-toggle:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--primary-soft); }
 
 /* ---------- Cartao bancario (A minha conta) ---------- */
 .bank-card {

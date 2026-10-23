@@ -104,6 +104,10 @@ curl -X POST http://localhost:8081/api/auth/login \
   -d '{"username":"admin","password":"Admin@123"}'
 ```
 
+### Colecção Postman
+
+Está em `postman/gestao-contas.postman_collection.json`. Importar no Postman e executar com **Run collection**, por ordem, com a API em `http://localhost:8081` (variável `baseUrl`). Cobre login, criação de contas, consultas, extracto, transferências e os casos de erro (400, 403, 409, 422). Cada execução gera números de conta e utilizadores novos, por isso pode repetir-se sem limpar a base de dados.
+
 ### Códigos de erro
 
 | Código | Quando                                                                 |
@@ -218,8 +222,11 @@ gestao-contas/
 └── docker-compose.yml
 ```
 
-## Limitações conhecidas
+## Decisões de âmbito e evolução
 
-- Não há recuperação de palavra-passe (fora do âmbito do enunciado).
-- Uma conta por cliente; sem edição nem encerramento de contas.
-- As credenciais e a chave JWT incluídas servem apenas para demonstração.
+O que ficou deliberadamente fora desta versão, e como seria feito:
+
+- **Recuperação de palavra-passe:** fora do âmbito do enunciado. Exigiria um fluxo por email com token de uso único e expiração curta.
+- **Uma conta por cliente:** simplificação do modelo (`accounts.owner_id` é único). Para vários produtos por cliente (Ordem e Poupança), separava-se uma tabela `customers` (nome, NUIT) e cada conta passava a referenciá-la.
+- **Edição e encerramento de contas:** não pedidos no enunciado.
+- **Credenciais e chave JWT de desenvolvimento:** servem apenas para demonstração; em produção definem-se por variáveis de ambiente (ver Configuração).
