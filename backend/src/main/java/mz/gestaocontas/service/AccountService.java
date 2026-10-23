@@ -53,7 +53,7 @@ public class AccountService {
     @Transactional
     public AccountResponse create(CreateAccountRequest request) {
         if (accountRepository.existsByAccountNumber(request.accountNumber())) {
-            throw new ConflictException("Ja existe uma conta com o número " + request.accountNumber());
+            throw new ConflictException("Já existe uma conta com o número " + request.accountNumber());
         }
         if (userRepository.existsByUsername(request.username())) {
             throw new ConflictException("O username '" + request.username() + "' já esta em uso");
@@ -126,7 +126,7 @@ public class AccountService {
     private Account authorize(String accountNumber, Authentication authentication) {
         Optional<Account> account = accountRepository.findByAccountNumber(accountNumber);
         if (isAdmin(authentication)) {
-            return account.orElseThrow(() -> new ResourceNotFoundException("Conta nao encontrada"));
+            return account.orElseThrow(() -> new ResourceNotFoundException("Conta não encontrada"));
         }
         return account
                 .filter(a -> a.getOwner().getUsername().equals(authentication.getName()))
