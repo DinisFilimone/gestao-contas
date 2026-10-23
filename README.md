@@ -104,9 +104,15 @@ curl -X POST http://localhost:8081/api/auth/login \
   -d '{"username":"admin","password":"Admin@123"}'
 ```
 
-### Colecção Postman
+### Teste rápido da API
 
-Está em `postman/gestao-contas.postman_collection.json`. Importar no Postman e executar com **Run collection**, por ordem, com a API em `http://localhost:8081` (variável `baseUrl`). Cobre login, criação de contas, consultas, extracto, transferências e os casos de erro (400, 403, 409, 422). Cada execução gera números de conta e utilizadores novos, por isso pode repetir-se sem limpar a base de dados.
+Com a aplicação a correr, o script `scripts/testar-api.ps1` percorre o fluxo completo (login, criação de contas, consultas, extracto, transferências e os casos de erro 400, 403, 409 e 422) e mostra PASS ou FAIL em cada passo:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\testar-api.ps1
+```
+
+Por omissão usa `http://localhost:8081`; para outra porta, acrescentar `-Base http://localhost:PORTA`. O resultado esperado é `17 passaram, 0 falharam`. Cada execução cria contas e utilizadores novos, por isso pode repetir-se sem limpar a base de dados. A API está também documentada no Swagger UI (ver acima).
 
 ### Códigos de erro
 
