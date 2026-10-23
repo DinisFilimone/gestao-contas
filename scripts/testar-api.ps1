@@ -8,6 +8,17 @@ param([string]$Base = "http://localhost:8081")
 $ok = 0
 $ko = 0
 
+# Espera ate a API responder (o arranque do Spring demora alguns segundos)
+$pronta = $false
+for ($i = 0; $i -lt 30; $i++) {
+  try { Invoke-WebRequest -Uri "$Base/api/ping" -UseBasicParsing | Out-Null; $pronta = $true; break }
+  catch { Start-Sleep -Seconds 2 }
+}
+if (-not $pronta) {
+  Write-Host "A API nao respondeu em $Base (60 s). Verifique se a aplicacao esta a correr." -ForegroundColor Red
+  exit 1
+}
+
 function Call($method, $path, $body, $token) {
   $headers = @{}
   if ($token) { $headers["Authorization"] = "Bearer $token" }
