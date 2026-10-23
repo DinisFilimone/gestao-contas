@@ -1,10 +1,27 @@
 @echo off
-cd /d "%~dp0"
+chcp 65001 >nul
+title Gestao de Contas - Arranque do Ambiente de Desenvolvimento
 
-echo A iniciar a base de dados...
-docker compose up -d db
-timeout /t 5 /nobreak >nul
+echo ========================================================
+echo A iniciar o ambiente de desenvolvimento (Gestao de Contas)...
+echo ========================================================
 
-echo A iniciar a API e o frontend...
-start "API (Spring Boot)" cmd /k "cd /d backend && gradle bootRun"
-start "Frontend (Angular)" cmd /k "cd /d frontend && npm start"
+:: 1. Parar eventuais instancias anteriores para evitar conflitos
+echo [1/2] A limpar contentores anteriores...
+docker compose -p gestao-github -f docker-compose.github.yml down >nul 2>&1
+
+:: 2. Subir toda a aplicacao via Docker (Base de Dados, Backend na 8081 e Frontend na 4201)
+echo [2/2] A iniciar todos os servicos via Docker...
+docker compose -p gestao-github -f docker-compose.github.yml up --build -d
+
+echo ========================================================
+echo Processo concluido com sucesso! 
+echo - Frontend (Browser): http://localhost:4201
+echo - Backend (API):      http://localhost:8081
+echo ========================================================
+
+:: 3. Abrir automaticamente o browser na pagina da aplicacao
+timeout /t 3 /nobreak >nul
+start http://localhost:4201
+
+pause

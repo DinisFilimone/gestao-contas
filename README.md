@@ -4,19 +4,19 @@ Módulo de gestão de contas bancárias, desenvolvido como avaliação técnica 
 
 ## Funcionalidades
 
-| Requisito do enunciado | Estado |
-|---|---|
-| Criar contas (nome, NUIT, número único, tipo Ordem/Poupança, saldo inicial) | ✅ |
-| Consultar contas e saldo | ✅ |
-| Transferências entre contas (origem, destino, valor, descrição) | ✅ |
-| Extracto (data/hora, tipo, valor, saldo resultante, descrição) | ✅ paginado |
-| Autenticação JWT com perfis Administrador e Cliente | ✅ |
-| API REST documentada (Swagger/OpenAPI) | ✅ |
-| Migrações da base de dados (Flyway) | ✅ |
-| Testes automáticos (JUnit) | ✅ |
-| Docker Compose | ✅ |
-| Interface web (Angular) | ✅ |
-| Extras da interface: modo claro/escuro, cartão com saldo e últimos movimentos, transferência em 3 passos com comprovativo imprimível, extracto exportável em CSV | ✅ |
+| Requisito do enunciado                                                                                                                                           | Estado      |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| Criar contas (nome, NUIT, número único, tipo Ordem/Poupança, saldo inicial)                                                                                      | ✅          |
+| Consultar contas e saldo                                                                                                                                         | ✅          |
+| Transferências entre contas (origem, destino, valor, descrição)                                                                                                  | ✅          |
+| Extracto (data/hora, tipo, valor, saldo resultante, descrição)                                                                                                   | ✅ paginado |
+| Autenticação JWT com perfis Administrador e Cliente                                                                                                              | ✅          |
+| API REST documentada (Swagger/OpenAPI)                                                                                                                           | ✅          |
+| Migrações da base de dados (Flyway)                                                                                                                              | ✅          |
+| Testes automáticos (JUnit)                                                                                                                                       | ✅          |
+| Docker Compose                                                                                                                                                   | ✅          |
+| Interface web (Angular)                                                                                                                                          | ✅          |
+| Extras da interface: modo claro/escuro, cartão com saldo e últimos movimentos, transferência em 3 passos com comprovativo imprimível, extracto exportável em CSV | ✅          |
 
 ## Tecnologias
 
@@ -37,11 +37,11 @@ docker compose up --build
 
 A primeira execução compila o backend e o frontend e demora alguns minutos. Depois:
 
-| Serviço | Endereço |
-|---|---|
-| Interface web | http://localhost:4200 |
-| API | http://localhost:8080/api |
-| Swagger UI | http://localhost:8080/swagger-ui/index.html |
+| Serviço       | Endereço                                    |
+| ------------- | ------------------------------------------- |
+| Interface web | http://localhost:4201                       |
+| API           | http://localhost:8081/api                   |
+| Swagger UI    | http://localhost:8081/swagger-ui/index.html |
 
 Para parar: `Ctrl+C` (ou `docker compose down`). Para apagar também os dados: `docker compose down -v`.
 
@@ -60,15 +60,15 @@ cd backend
 # 3) Frontend (noutro terminal)
 cd frontend
 npm install
-npm start                  # http://localhost:4200
+npm start                  # http://localhost:4201
 ```
 
 ## Credenciais de demonstração
 
-| Perfil | Utilizador | Palavra-passe | Como obter |
-|---|---|---|---|
-| Administrador | `admin` | `Admin@123` | Criado automaticamente no primeiro arranque |
-| Cliente | *(à escolha)* | *(à escolha)* | O administrador cria o cliente ao abrir uma conta |
+| Perfil        | Utilizador    | Palavra-passe | Como obter                                        |
+| ------------- | ------------- | ------------- | ------------------------------------------------- |
+| Administrador | `admin`       | `Admin@123`   | Criado automaticamente no primeiro arranque       |
+| Cliente       | _(à escolha)_ | _(à escolha)_ | O administrador cria o cliente ao abrir uma conta |
 
 > Estas credenciais são **apenas para desenvolvimento**. Ver [Configuração](#configuração).
 
@@ -84,48 +84,48 @@ npm start                  # http://localhost:4200
 
 A documentação interactiva está no Swagger UI. Para testar endpoints protegidos: fazer login em `POST /api/auth/login`, copiar o `token`, clicar em **Authorize** e colá-lo.
 
-| Método e rota | Quem acede | Descrição |
-|---|---|---|
-| `POST /api/auth/login` | todos | Devolve o token JWT |
-| `GET /api/auth/me` | autenticado | Utilizador e perfis do token |
-| `POST /api/accounts` | Administrador | Cria cliente, conta e movimento de abertura |
-| `GET /api/accounts` | Administrador | Lista todas as contas |
-| `GET /api/accounts/me` | Cliente | A conta do utilizador autenticado |
-| `GET /api/accounts/{numero}` | Admin (qualquer) · Cliente (só a sua) | Dados da conta |
-| `GET /api/accounts/{numero}/balance` | Admin (qualquer) · Cliente (só a sua) | Saldo |
-| `GET /api/accounts/{numero}/statement?page=&size=` | Admin (qualquer) · Cliente (só a sua) | Extracto paginado |
-| `POST /api/transfers` | Só Cliente (da sua própria conta) | Transferência atómica |
+| Método e rota                                      | Quem acede                            | Descrição                                   |
+| -------------------------------------------------- | ------------------------------------- | ------------------------------------------- |
+| `POST /api/auth/login`                             | todos                                 | Devolve o token JWT                         |
+| `GET /api/auth/me`                                 | autenticado                           | Utilizador e perfis do token                |
+| `POST /api/accounts`                               | Administrador                         | Cria cliente, conta e movimento de abertura |
+| `GET /api/accounts`                                | Administrador                         | Lista todas as contas                       |
+| `GET /api/accounts/me`                             | Cliente                               | A conta do utilizador autenticado           |
+| `GET /api/accounts/{numero}`                       | Admin (qualquer) · Cliente (só a sua) | Dados da conta                              |
+| `GET /api/accounts/{numero}/balance`               | Admin (qualquer) · Cliente (só a sua) | Saldo                                       |
+| `GET /api/accounts/{numero}/statement?page=&size=` | Admin (qualquer) · Cliente (só a sua) | Extracto paginado                           |
+| `POST /api/transfers`                              | Só Cliente (da sua própria conta)     | Transferência atómica                       |
 
 Exemplo de login:
 
 ```bash
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST http://localhost:8081/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"Admin@123"}'
 ```
 
 ### Códigos de erro
 
-| Código | Quando |
-|---|---|
-| 400 | Dados inválidos (por exemplo, valor negativo ou NUIT mal formado) |
-| 401 | Sem token, ou token inválido/expirado |
-| 403 | Sem permissão (por exemplo, cliente a aceder a conta alheia) |
-| 404 | Conta inexistente (vista pelo administrador) |
-| 409 | Conflito (número de conta ou utilizador já existente) |
-| 422 | Regra de negócio violada (saldo insuficiente, origem igual ao destino) |
+| Código | Quando                                                                 |
+| ------ | ---------------------------------------------------------------------- |
+| 400    | Dados inválidos (por exemplo, valor negativo ou NUIT mal formado)      |
+| 401    | Sem token, ou token inválido/expirado                                  |
+| 403    | Sem permissão (por exemplo, cliente a aceder a conta alheia)           |
+| 404    | Conta inexistente (vista pelo administrador)                           |
+| 409    | Conflito (número de conta ou utilizador já existente)                  |
+| 422    | Regra de negócio violada (saldo insuficiente, origem igual ao destino) |
 
 ## Regras de negócio e onde são garantidas
 
-| Regra | Garantia |
-|---|---|
-| Número de conta único | `UNIQUE` na base de dados + verificação no serviço (erro 409) |
-| Saldo nunca negativo | Validação no serviço + `CHECK (balance >= 0)` na base de dados |
-| Apenas valores positivos | Bean Validation (`@DecimalMin("0.01")`, máx. 2 casas decimais) |
-| Todas as operações com data e hora | Cada movimento é gravado com `created_at` |
-| Transferências atómicas | `@Transactional`: qualquer falha desfaz saldos e movimentos |
+| Regra                                      | Garantia                                                                                                                    |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| Número de conta único                      | `UNIQUE` na base de dados + verificação no serviço (erro 409)                                                               |
+| Saldo nunca negativo                       | Validação no serviço + `CHECK (balance >= 0)` na base de dados                                                              |
+| Apenas valores positivos                   | Bean Validation (`@DecimalMin("0.01")`, máx. 2 casas decimais)                                                              |
+| Todas as operações com data e hora         | Cada movimento é gravado com `created_at`                                                                                   |
+| Transferências atómicas                    | `@Transactional`: qualquer falha desfaz saldos e movimentos                                                                 |
 | Sem saldo "perdido" em acessos simultâneos | Bloqueio pessimista (`SELECT ... FOR UPDATE`) das duas contas, sempre pela mesma ordem (`id`), o que também evita deadlocks |
-| Valores monetários exactos | `BigDecimal` / `NUMERIC(19,2)` |
+| Valores monetários exactos                 | `BigDecimal` / `NUMERIC(19,2)`                                                                                              |
 
 Cada transferência gera **dois movimentos** (enviada e recebida) ligados pela mesma `transfer_reference`.
 
@@ -137,7 +137,7 @@ Cada transferência gera **dois movimentos** (enviada e recebida) ligados pela m
 - Autorização por perfil, em duas camadas: regras por URL no `SecurityConfig` e `@PreAuthorize` nos métodos.
 - Um cliente que peça uma conta alheia ou inexistente recebe sempre **403**, para não revelar que números de conta existem.
 - Erros devolvidos num formato JSON uniforme, sem expor detalhes internos.
-- CORS limitado à origem do frontend (`http://localhost:4200`).
+- CORS limitado à origem do frontend (`http://localhost:4201`).
 
 ## Testes
 
@@ -152,15 +152,15 @@ Os testes usam **PostgreSQL real**, numa base separada (`gestao_contas_test`), p
 CREATE DATABASE gestao_contas_test;
 ```
 
-| Teste | O que prova |
-|---|---|
-| Transferência válida | Saldos actualizados e dois movimentos registados |
-| Saldo insuficiente | Rejeitada, sem alterar saldos nem movimentos |
-| Falha a meio | Rollback de saldos e do primeiro movimento |
-| 20 transferências simultâneas | Com 1000 de saldo e pedidos de 100, passam exactamente 10; saldo final 0, nunca negativo |
-| Transferências cruzadas (A→B e B→A) | Terminam todas, sem deadlock |
-| Cliente tenta transferir de conta alheia | Rejeitada (403), saldos intactos |
-| Administrador tenta transferir | Rejeitada (403), saldos intactos |
+| Teste                                    | O que prova                                                                              |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Transferência válida                     | Saldos actualizados e dois movimentos registados                                         |
+| Saldo insuficiente                       | Rejeitada, sem alterar saldos nem movimentos                                             |
+| Falha a meio                             | Rollback de saldos e do primeiro movimento                                               |
+| 20 transferências simultâneas            | Com 1000 de saldo e pedidos de 100, passam exactamente 10; saldo final 0, nunca negativo |
+| Transferências cruzadas (A→B e B→A)      | Terminam todas, sem deadlock                                                             |
+| Cliente tenta transferir de conta alheia | Rejeitada (403), saldos intactos                                                         |
+| Administrador tenta transferir           | Rejeitada (403), saldos intactos                                                         |
 
 O relatório em HTML fica em `backend/build/reports/tests/test/index.html`.
 
@@ -185,12 +185,12 @@ movements (id, account_id → accounts, type ABERTURA|TRANSFERENCIA_ENVIADA|TRAN
 
 O backend lê estas variáveis de ambiente (os valores por omissão servem só para desenvolvimento):
 
-| Variável | Por omissão | Descrição |
-|---|---|---|
-| `DB_URL` | `jdbc:postgresql://localhost:5432/gestao_contas` | Ligação à base de dados |
-| `DB_USER` / `DB_PASSWORD` | `contas` / `contas123` | Credenciais da base de dados |
-| `JWT_SECRET` | chave de desenvolvimento | Chave de assinatura do JWT. **Alterar em produção** |
-| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `admin` / `Admin@123` | Administrador inicial. **Alterar a palavra-passe em produção** |
+| Variável                            | Por omissão                                      | Descrição                                                      |
+| ----------------------------------- | ------------------------------------------------ | -------------------------------------------------------------- |
+| `DB_URL`                            | `jdbc:postgresql://localhost:5432/gestao_contas` | Ligação à base de dados                                        |
+| `DB_USER` / `DB_PASSWORD`           | `contas` / `contas123`                           | Credenciais da base de dados                                   |
+| `JWT_SECRET`                        | chave de desenvolvimento                         | Chave de assinatura do JWT. **Alterar em produção**            |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `admin` / `Admin@123`                            | Administrador inicial. **Alterar a palavra-passe em produção** |
 
 ## Estrutura do projecto
 
