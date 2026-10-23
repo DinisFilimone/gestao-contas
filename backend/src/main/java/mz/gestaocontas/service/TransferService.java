@@ -61,7 +61,7 @@ public class TransferService {
             throw new AccessDeniedException("Sem acesso a conta de origem");
         }
         if (target == null) {
-            throw new ResourceNotFoundException("Conta de destino nao encontrada");
+            throw new ResourceNotFoundException("Conta de destino não encontrada");
         }
 
         // 3) Regra de negocio: saldo nunca fica negativo.
@@ -78,7 +78,7 @@ public class TransferService {
         // 5) Regista os dois movimentos, ligados pela mesma referencia.
         String reference = UUID.randomUUID().toString();
         String description = (request.description() == null || request.description().isBlank())
-                ? "Transferencia"
+                ? "Transferência"
                 : request.description().trim();
 
         Movement sent = buildMovement(source, MovementType.TRANSFERENCIA_ENVIADA, amount,

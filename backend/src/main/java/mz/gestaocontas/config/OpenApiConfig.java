@@ -9,10 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 /** Documentacao Swagger com o botao "Authorize" para colar o token JWT. */
 @Configuration
-@OpenAPIDefinition(
-        info = @Info(title = "Gestao de Contas Bancarias", version = "1.0",
-                description = "API REST: contas, transferencias e extracto, com JWT (ADMIN e CLIENTE)"),
-        security = @SecurityRequirement(name = "bearerAuth"))
+@OpenAPIDefinition(info = @Info(title = "Gestão de Contas Bancárias", version = "1.0", description = "API REST: contas, transferências e extrato, com JWT (ADMIN e CLIENTE)"), security = @SecurityRequirement(name = "bearerAuth"))
 @SecurityScheme(name = "bearerAuth", type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT")
 public class OpenApiConfig {
 }

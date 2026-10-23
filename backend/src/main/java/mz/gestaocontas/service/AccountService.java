@@ -39,21 +39,24 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
 
     public AccountService(AccountRepository accountRepository, MovementRepository movementRepository,
-                          UserRepository userRepository, PasswordEncoder passwordEncoder) {
+            UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.accountRepository = accountRepository;
         this.movementRepository = movementRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    /** Cria utilizador CLIENTE + conta + movimento de abertura, tudo na mesma transaccao. */
+    /**
+     * Cria utilizador CLIENTE + conta + movimento de abertura, tudo na mesma
+     * transaccao.
+     */
     @Transactional
     public AccountResponse create(CreateAccountRequest request) {
         if (accountRepository.existsByAccountNumber(request.accountNumber())) {
-            throw new ConflictException("Ja existe uma conta com o numero " + request.accountNumber());
+            throw new ConflictException("Ja existe uma conta com o número " + request.accountNumber());
         }
         if (userRepository.existsByUsername(request.username())) {
-            throw new ConflictException("O username '" + request.username() + "' ja esta em uso");
+            throw new ConflictException("O username '" + request.username() + "' já esta em uso");
         }
 
         User owner = userRepository.save(
@@ -89,7 +92,7 @@ public class AccountService {
     @Transactional(readOnly = true)
     public AccountResponse getMine(Authentication authentication) {
         Account account = accountRepository.findByOwnerUsername(authentication.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("O utilizador nao tem conta associada"));
+                .orElseThrow(() -> new ResourceNotFoundException("O utilizador não tem conta associada"));
         return AccountResponse.from(account);
     }
 
@@ -106,7 +109,7 @@ public class AccountService {
 
     @Transactional(readOnly = true)
     public PageResponse<MovementResponse> statement(String accountNumber, int page, int size,
-                                                    Authentication authentication) {
+            Authentication authentication) {
         Account account = authorize(accountNumber, authentication);
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
                 Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id")));
