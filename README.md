@@ -185,12 +185,15 @@ movements (id, account_id → accounts, type ABERTURA|TRANSFERENCIA_ENVIADA|TRAN
 
 O backend lê estas variáveis de ambiente (os valores por omissão servem só para desenvolvimento):
 
-| Variável                            | Por omissão                                      | Descrição                                                      |
-| ----------------------------------- | ------------------------------------------------ | -------------------------------------------------------------- |
-| `DB_URL`                            | `jdbc:postgresql://localhost:5432/gestao_contas` | Ligação à base de dados                                        |
-| `DB_USER` / `DB_PASSWORD`           | `contas` / `contas123`                           | Credenciais da base de dados                                   |
-| `JWT_SECRET`                        | chave de desenvolvimento                         | Chave de assinatura do JWT. **Alterar em produção**            |
-| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `admin` / `Admin@123`                            | Administrador inicial. **Alterar a palavra-passe em produção** |
+| Variável                            | Por omissão                                      | Descrição                                                                      |
+| ----------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `DB_URL`                            | `jdbc:postgresql://localhost:5433/gestao_contas` | Ligação à base de                                                              |
+| dados                               |
+| `DB_USER` / `DB_PASSWORD`           | `contas` / `contas123`                           | Credenciais da base de dados                                                   |
+| `JWT_SECRET`                        | chave de desenvolvimento                         | Chave de assinatura do JWT. **Alterar em produção**                            |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `admin` / `Admin@123`                            | Administrador inicial. **Alterar a palavra-passe em produção**                 |
+| `SERVER_PORT`                       | `8081`                                           | Porta da API (no Docker, o contentor usa a 8080 e o compose publica-a na 8081) |
+| `CORS_ALLOWED_ORIGINS`              | `http://localhost:4201`                          | Origens autorizadas pelo CORS, separadas por vírgula                           |
 
 ## Estrutura do projecto
 

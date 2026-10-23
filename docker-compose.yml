@@ -1,19 +1,14 @@
-# Arranque completo: base de dados + backend + frontend.
-#   docker compose up --build        -> tudo (http://localhost:4200)
-#   docker compose up -d db          -> so a base de dados (para desenvolver no VS Code)
-services:
+﻿services:
   db:
     image: postgres:16-alpine
-    container_name: gestao-contas-db
     environment:
       POSTGRES_DB: gestao_contas
       POSTGRES_USER: contas
       POSTGRES_PASSWORD: contas123
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # cria tambem a base usada pelos testes (so corre na primeira criacao do volume)
       - ./docker/init-test-db.sql:/docker-entrypoint-initdb.d/10-test-db.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U contas -d gestao_contas"]
@@ -23,25 +18,26 @@ services:
 
   backend:
     build: ./backend
-    container_name: gestao-contas-backend
     depends_on:
       db:
         condition: service_healthy
     environment:
+      SERVER_PORT: 8080
       DB_URL: jdbc:postgresql://db:5432/gestao_contas
       DB_USER: contas
       DB_PASSWORD: contas123
-      # Em producao, defina tambem JWT_SECRET e ADMIN_PASSWORD (ver README).
+      CORS_ALLOWED_ORIGINS: http://localhost:4201
     ports:
-      - "8080:8080"
+      - "8081:8080"
+
+      
 
   frontend:
     build: ./frontend
-    container_name: gestao-contas-frontend
     depends_on:
       - backend
     ports:
-      - "4200:80"
+      - "4201:80"
 
 volumes:
   pgdata:

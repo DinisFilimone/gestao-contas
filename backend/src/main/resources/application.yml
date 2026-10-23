@@ -2,7 +2,7 @@ spring:
   application:
     name: gestao-contas
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/gestao_contas}
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/gestao_contas}
     username: ${DB_USER:contas}
     password: ${DB_PASSWORD:contas123}
   jpa:
@@ -13,7 +13,7 @@ spring:
     enabled: true
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8081}
 
 # Valores de DESENVOLVIMENTO. Em producao definir JWT_SECRET e ADMIN_PASSWORD por variavel de ambiente.
 app:

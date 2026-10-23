@@ -1,3 +1,3 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/gestao_contas_test
+    url: jdbc:postgresql://localhost:5433/gestao_contas_test

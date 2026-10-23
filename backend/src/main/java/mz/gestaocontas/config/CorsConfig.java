@@ -12,8 +12,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class CorsConfig {
 
-    /** Origens permitidas, separadas por virgula. Por omissao: http://localhost:4200 */
-    @Value("${CORS_ALLOWED_ORIGINS:http://localhost:4200}")
+    /**
+     * Origens permitidas, separadas por virgula. Por omissao: http://localhost:4201
+     */
+    @Value("${CORS_ALLOWED_ORIGINS:http://localhost:4201}")
     private String allowedOrigins;
 
     @Bean

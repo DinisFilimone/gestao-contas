@@ -8,11 +8,11 @@ echo ========================================================
 
 :: 1. Parar eventuais instancias anteriores para evitar conflitos
 echo [1/2] A limpar contentores anteriores...
-docker compose -p gestao-github -f docker-compose.github.yml down >nul 2>&1
+docker compose down >nul 2>&1
 
 :: 2. Subir toda a aplicacao via Docker (Base de Dados, Backend na 8081 e Frontend na 4201)
 echo [2/2] A iniciar todos os servicos via Docker...
-docker compose -p gestao-github -f docker-compose.github.yml up --build -d
+docker compose up --build -d
 
 echo ========================================================
 echo Processo concluido com sucesso! 
