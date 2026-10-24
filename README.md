@@ -45,9 +45,11 @@ A primeira execução compila o backend e o frontend e demora alguns minutos. De
 
 Para parar: `Ctrl+C` (ou `docker compose down`). Para apagar também os dados: `docker compose down -v`.
 
+No Windows, o ficheiro `iniciar.bat` faz o mesmo com duplo clique. As portas (4201, 8081 e 5433) são deliberadamente diferentes das habituais (4200, 8080 e 5432) para não colidirem com outros serviços da máquina.
+
 ### Opção B: desenvolvimento local
 
-Requisitos: Docker, JDK 21 (ou 17+) e Node.js 20+.
+Requisitos: Docker, JDK 17+ (testado com o 21) e Node.js 22.12+.
 
 ```bash
 # 1) Base de dados (só o PostgreSQL)
@@ -62,6 +64,8 @@ cd frontend
 npm install
 npm start                  # http://localhost:4201
 ```
+
+No Linux/macOS, se `./gradlew` der «Permission denied»: `chmod +x gradlew`.
 
 ## Credenciais de demonstração
 
@@ -113,6 +117,10 @@ powershell -ExecutionPolicy Bypass -File .\scripts\testar-api.ps1
 ```
 
 Por omissão usa `http://localhost:8081`; para outra porta, acrescentar `-Base http://localhost:PORTA`. O resultado esperado é `17 passaram, 0 falharam`. Cada execução cria contas e utilizadores novos, por isso pode repetir-se sem limpar a base de dados. A API está também documentada no Swagger UI (ver acima).
+
+### Colecção Postman
+
+Em `docs/postman/gestao-contas.postman_collection.json`. Importar no Postman e executar a colecção inteira (**Run collection**) pela ordem: cria duas contas, faz login como administrador e como cliente, consulta saldo e extracto, transfere e testa os erros 400, 401, 403, 409 e 422. A variável `baseUrl` vem a `http://localhost:8081`.
 
 ### Códigos de erro
 
@@ -197,8 +205,7 @@ O backend lê estas variáveis de ambiente (os valores por omissão servem só p
 
 | Variável                            | Por omissão                                      | Descrição                                                                      |
 | ----------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------ |
-| `DB_URL`                            | `jdbc:postgresql://localhost:5433/gestao_contas` | Ligação à base de                                                              |
-| dados                               |
+| `DB_URL` | `jdbc:postgresql://localhost:5433/gestao_contas` | Ligação à base de dados |
 | `DB_USER` / `DB_PASSWORD`           | `contas` / `contas123`                           | Credenciais da base de dados                                                   |
 | `JWT_SECRET`                        | chave de desenvolvimento                         | Chave de assinatura do JWT. **Alterar em produção**                            |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `admin` / `Admin@123`                            | Administrador inicial. **Alterar a palavra-passe em produção**                 |
@@ -235,4 +242,5 @@ O que ficou deliberadamente fora desta versão, e como seria feito:
 - **Recuperação de palavra-passe:** fora do âmbito do enunciado. Exigiria um fluxo por email com token de uso único e expiração curta.
 - **Uma conta por cliente:** simplificação do modelo (`accounts.owner_id` é único). Para vários produtos por cliente (Ordem e Poupança), separava-se uma tabela `customers` (nome, NUIT) e cada conta passava a referenciá-la.
 - **Edição e encerramento de contas:** não pedidos no enunciado.
+- **Redis:** não foi necessário (JWT sem estado no servidor e sem cache). Em produção serviria para cache de consultas, lista de revogação de tokens ou limitação de tentativas de login.
 - **Credenciais e chave JWT de desenvolvimento:** servem apenas para demonstração; em produção definem-se por variáveis de ambiente (ver Configuração).

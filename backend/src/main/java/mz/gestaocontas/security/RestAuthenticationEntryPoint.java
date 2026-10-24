@@ -28,6 +28,6 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
         mapper.writeValue(response.getOutputStream(),
-                ApiError.of(HttpStatus.UNAUTHORIZED, "Autenticacao necessaria: token em falta, invalido ou expirado"));
+                ApiError.of(HttpStatus.UNAUTHORIZED, "Autenticação necessária: token em falta, inválido ou expirado"));
     }
 }

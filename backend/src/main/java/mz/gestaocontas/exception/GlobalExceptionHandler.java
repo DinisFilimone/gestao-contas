@@ -26,17 +26,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleUnreadable(HttpMessageNotReadableException ex) {
-        return build(HttpStatus.BAD_REQUEST, "Corpo do pedido invalido ou com valores nao reconhecidos");
+        return build(HttpStatus.BAD_REQUEST, "Corpo do pedido inválido ou com valores não reconhecidos");
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiError> handleBadCredentials(BadCredentialsException ex) {
-        return build(HttpStatus.UNAUTHORIZED, "Credenciais invalidas");
+        return build(HttpStatus.UNAUTHORIZED, "Credenciais inválidas");
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex) {
-        return build(HttpStatus.FORBIDDEN, "Sem permissao para esta operacao");
+        return build(HttpStatus.FORBIDDEN, "Sem permissão para esta operação");
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleIntegrity(DataIntegrityViolationException ex) {
-        return build(HttpStatus.CONFLICT, "Violacao de integridade dos dados (valor duplicado ou invalido)");
+        return build(HttpStatus.CONFLICT, "Violação de integridade dos dados (valor duplicado ou inválido)");
     }
 
     private ResponseEntity<ApiError> build(HttpStatus status, String message) {
