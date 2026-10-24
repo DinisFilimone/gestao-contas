@@ -29,7 +29,7 @@ Módulo de gestão de contas bancárias, desenvolvido como avaliação técnica 
 
 ### Opção A: tudo com Docker (recomendada)
 
-Requisito: [Docker](https://www.docker.com/) com Docker Compose.
+Requisito: [Docker](https://www.docker.com/) com Docker Compose (Docker Desktop no Windows/macOS; Docker Engine com o plugin Compose no Linux). Sem Docker, ver a Opção C.
 
 ```bash
 docker compose up --build
@@ -66,6 +66,38 @@ npm start                  # http://localhost:4201
 ```
 
 No Linux/macOS, se `./gradlew` der «Permission denied»: `chmod +x gradlew`.
+
+### Opção C: sem Docker (PostgreSQL instalado na máquina)
+
+Requisitos: PostgreSQL 14+ (testado com o 16), JDK 17+ e Node.js 22.12+.
+
+```sql
+-- 1) No psql, como administrador do PostgreSQL:
+CREATE USER contas WITH PASSWORD 'contas123';
+CREATE DATABASE gestao_contas OWNER contas;
+```
+
+```powershell
+# 2) Backend (Windows PowerShell). Ajustar a porta do PostgreSQL em DB_URL (5432 por omissão no PostgreSQL)
+cd backend
+$env:DB_URL = "jdbc:postgresql://localhost:5432/gestao_contas"
+.\gradlew.bat bootRun
+```
+
+```bash
+# 2) Backend (Linux/macOS)
+cd backend
+DB_URL=jdbc:postgresql://localhost:5432/gestao_contas ./gradlew bootRun
+```
+
+```bash
+# 3) Frontend (noutro terminal)
+cd frontend
+npm install
+npm start                  # http://localhost:4201
+```
+
+O Flyway cria as tabelas e o administrador inicial é criado no primeiro arranque. Para correr os testes (`gradlew test`) é preciso criar também `gestao_contas_test` (`CREATE DATABASE gestao_contas_test OWNER contas;`) e, se o PostgreSQL não estiver na porta 5433, ajustar `backend/src/test/resources/application-test.yml`.
 
 ## Credenciais de demonstração
 
